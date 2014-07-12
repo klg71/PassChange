@@ -1,9 +1,12 @@
 package ui;
 
+import plugins.Facebook;
+
 public class TaskMain {
 
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
+		Facebook facebook= new Facebook("","");
+		facebook.authenticate();
 
 	}
 
