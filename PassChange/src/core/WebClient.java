@@ -6,6 +6,10 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
+import java.net.CookieHandler;
+import java.net.CookieManager;
+import java.net.CookieStore;
+import java.net.HttpCookie;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
@@ -24,11 +28,16 @@ public class WebClient {
 	private String body;
 	private String cookies;
 	private HttpsURLConnection connection;
+	private CookieManager cookieManager;
+	private CookieStore cookieStore;
 	private URL url;
 
 	public WebClient() {
 		super();
 		cookies = "";
+		cookieManager=new CookieManager();
+		CookieHandler.setDefault(cookieManager);
+		cookieStore = cookieManager.getCookieStore();
 	}
 
 	private void initConnection() {
@@ -67,14 +76,13 @@ public class WebClient {
 						"Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:29.0) Gecko/20100101 Firefox/29.0");
 		connection.setRequestProperty("Accept", "*/*");
 		//connection.setRequestProperty("Accept-Encoding", "gzip, deflate");
-			try {
-				connection.setRequestProperty("Cookie",
-						URLEncoder.encode(cookies, "UTF-8"));
-			} catch (UnsupportedEncodingException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		
+//			try {
+//				connection.setRequestProperty("Cookie",
+//						URLEncoder.encode(cookies, "UTF-8"));
+//			} catch (UnsupportedEncodingException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
 
 	}
 
@@ -112,13 +120,18 @@ public class WebClient {
 		}
 		for (Map.Entry<String, List<String>> entry : connection
 				.getHeaderFields().entrySet()) {
-			// System.out.println(entry.getKey()+":");
-			// for(String value:entry.getValue()){
-			// System.out.print(value);
-			// }
-			// System.out.println();
+//			 System.out.println(entry.getKey()+":");
+//			 for(String value:entry.getValue()){
+//			 System.out.print(value);
+//			 }
+//			 System.out.println();
 		}
-		setCookies();
+		//setCookies();
+
+		 List<HttpCookie> cks = cookieStore.getCookies();
+		 for (HttpCookie ck : cks) {
+		 System.out.println(ck);
+		 }
 		BufferedReader reader = null;
 		if (connection.getHeaderField("Content-Encoding") != null) {
 			try {
@@ -154,38 +167,13 @@ public class WebClient {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
 	}
 
 	public String getCookies() {
 		return cookies;
 	}
 
-	private void setCookies() {
-		cookies = "";
-		List<String> cookieList = connection.getHeaderFields()
-				.get("Set-Cookie");
-		for (String value : cookieList) {
-			try {
-				// System.out.println(URLDecoder.decode(value,
-				// "UTF-8").substring(
-				// 0, URLDecoder.decode(value, "UTF-8").indexOf(";")));
-				if (cookies != "") {
-					cookies = cookies
-							+ ";"
-							+ URLDecoder.decode(value, "UTF-8").substring(
-									0,
-									URLDecoder.decode(value, "UTF-8").indexOf(
-											";"));
-				} else {
-					cookies = URLDecoder.decode(value, "UTF-8").substring(0,
-							URLDecoder.decode(value, "UTF-8").indexOf(";"));
-				}
-			} catch (UnsupportedEncodingException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		System.out.println(cookies);
-	}
+	
 
 }
