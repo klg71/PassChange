@@ -26,16 +26,16 @@ import javax.net.ssl.HttpsURLConnection;
 public class WebClient {
 	private RequestType type;
 	private String body;
-	private String cookies;
 	private HttpsURLConnection connection;
 	private CookieManager cookieManager;
 	private CookieStore cookieStore;
 	private URL url;
+	boolean ref;
 
 	public WebClient() {
 		super();
-		cookies = "";
-		cookieManager=new CookieManager();
+		ref = false;
+		cookieManager = new CookieManager();
 		CookieHandler.setDefault(cookieManager);
 		cookieStore = cookieManager.getCookieStore();
 	}
@@ -50,6 +50,7 @@ public class WebClient {
 		if (type == RequestType.GET) {
 			try {
 				connection.setRequestMethod("GET");
+				connection.setDoOutput(false);
 			} catch (ProtocolException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -57,37 +58,50 @@ public class WebClient {
 		} else {
 			try {
 				connection.setRequestMethod("POST");
+				connection.setDoOutput(true);
 			} catch (ProtocolException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
 		connection.setDoInput(true);
-		connection.setDoOutput(true);
+
 		connection.setUseCaches(false);
-		connection.setRequestProperty("host",url.getHost());
+		connection.setRequestProperty("host", url.getHost());
+		System.out.println(url.getHost());
+		if (ref) {
+			// connection.setRequestProperty("Referer","https://m.facebook.com/composer/?sbu=%2Fa%2Fhome.php&fin=status&csid=94f06c50-debe-44da-a8fb-7c11fb3b80a5&cwevent=composer_entry&referrer=feed&hash=AZs4fvwVBMiOyz6M&refid=7");
+		}
 		if (type == RequestType.POST) {
 			connection.setRequestProperty("Content-Length",
 					String.valueOf(body.length()));
-			connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+			connection.setRequestProperty("Content-Type",
+					"application/x-www-form-urlencoded");
 		}
+		connection.setRequestProperty("Connection", "keep-alive");
+		connection.setRequestProperty("DNT", "1");
+		connection.setRequestProperty("Accept-Language",
+				"de-de,de;q=0.8,en-us;q=0.5,en;q=0.3");
 		connection
 				.setRequestProperty("User-Agent",
 						"Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:29.0) Gecko/20100101 Firefox/29.0");
-		connection.setRequestProperty("Accept", "*/*");
-		//connection.setRequestProperty("Accept-Encoding", "gzip, deflate");
-//			try {
-//				connection.setRequestProperty("Cookie",
-//						URLEncoder.encode(cookies, "UTF-8"));
-//			} catch (UnsupportedEncodingException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
+		connection
+				.setRequestProperty("Accept",
+						"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
+		connection.setRequestProperty("Accept-Encoding", "gzip, deflate");
+		// try {
+		// connection.setRequestProperty("Cookie",
+		// URLEncoder.encode(cookies, "UTF-8"));
+		// } catch (UnsupportedEncodingException e) {
+		// // TODO Auto-generated catch block
+		// e.printStackTrace();
+		// }
 
 	}
 
 	public void sendRequest(String url, RequestType type, String body,
-			String cookies, String filename) {
+			String filename, Boolean ref) {
+		System.out.println(filename);
 		FileWriter fileWriter = null;
 		try {
 			fileWriter = new FileWriter(filename + ".html");
@@ -103,35 +117,41 @@ public class WebClient {
 		}
 		this.type = type;
 		this.body = body;
-		if (cookies != "")
-			this.cookies = cookies;
+		this.ref = ref;
 		initConnection();
 
 		OutputStreamWriter writer = null;
 		try {
-			writer = new OutputStreamWriter(connection.getOutputStream());
 			if (type == RequestType.POST) {
+				writer = new OutputStreamWriter(connection.getOutputStream());
 				writer.write(body);
+				writer.flush();
 			}
-			writer.flush();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		for (Map.Entry<String, List<String>> entry : connection
 				.getHeaderFields().entrySet()) {
-//			 System.out.println(entry.getKey()+":");
-//			 for(String value:entry.getValue()){
-//			 System.out.print(value);
-//			 }
-//			 System.out.println();
+			// System.out.println(entry.getKey()+":");
+			// for(String value:entry.getValue()){
+			// System.out.print(value);
+			// }
+			// System.out.println();
 		}
-		//setCookies();
+		// setCookies();
 
-		 List<HttpCookie> cks = cookieStore.getCookies();
-		 for (HttpCookie ck : cks) {
-		 System.out.println(ck);
-		 }
+		List<HttpCookie> cks = cookieStore.getCookies();
+		for (HttpCookie ck : cks) {
+			try {
+				System.out.print(URLDecoder.decode(ck.getName(), "UTF-8")
+						+ ": ");
+				System.out.println(URLDecoder.decode(ck.getValue(), "UTF-8"));
+			} catch (UnsupportedEncodingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 		BufferedReader reader = null;
 		if (connection.getHeaderField("Content-Encoding") != null) {
 			try {
@@ -153,27 +173,24 @@ public class WebClient {
 
 		try {
 			for (String line; (line = reader.readLine()) != null;) {
-				// System.out.println( line );
+				System.out.println(line);
 				fileWriter.write(line);
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+
 		try {
 			reader.close();
-			writer.close();
+			if (writer != null)
+				writer.close();
+			fileWriter.close();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-	}
 
-	public String getCookies() {
-		return cookies;
 	}
-
-	
 
 }
