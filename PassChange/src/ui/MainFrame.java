@@ -2,6 +2,8 @@ package ui;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -12,11 +14,16 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JTree;
+import javax.swing.event.AncestorEvent;
+import javax.swing.event.AncestorListener;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import core.Website;
 
-public class MainFrame extends JFrame implements ActionListener {
+public class MainFrame extends JFrame implements ActionListener,
+		TreeSelectionListener {
 	/**
 	 * 
 	 */
@@ -46,6 +53,7 @@ public class MainFrame extends JFrame implements ActionListener {
 		createNodes(top);
 
 		websiteTree = new JTree(top);
+		websiteTree.addTreeSelectionListener(this);
 		add(websiteTree);
 	}
 
@@ -59,30 +67,37 @@ public class MainFrame extends JFrame implements ActionListener {
 	}
 
 	private void createNodes(DefaultMutableTreeNode top) {
-		
-		
-		HashMap<String,ArrayList<Website>> websiteMap=new HashMap<String,ArrayList<Website>>();
-		
+
+		HashMap<String, ArrayList<Website>> websiteMap = new HashMap<String, ArrayList<Website>>();
+
 		DefaultMutableTreeNode category = null;
 		DefaultMutableTreeNode book = null;
 		for (Website website : websites) {
-			if(websiteMap.containsKey(website.getTopic())){
+			if (websiteMap.containsKey(website.getTopic())) {
 				websiteMap.get(website.getTopic()).add(website);
 			} else {
-				ArrayList<Website> temp=new ArrayList<Website>();
+				ArrayList<Website> temp = new ArrayList<Website>();
 				temp.add(website);
 				websiteMap.put(website.getTopic(), temp);
 			}
 		}
-		
 
-		for(Entry<String, ArrayList<Website>> entry:websiteMap.entrySet()){
+		for (Entry<String, ArrayList<Website>> entry : websiteMap.entrySet()) {
 			category = new DefaultMutableTreeNode(entry.getKey());
 			top.add(category);
-			for(Website site : entry.getValue()){
+			for (Website site : entry.getValue()) {
 				category.add(new DefaultMutableTreeNode(site));
 			}
 		}
+
+	}
+
+	@Override
+	public void valueChanged(TreeSelectionEvent arg0) {
+		DefaultMutableTreeNode node = (DefaultMutableTreeNode) websiteTree
+				.getLastSelectedPathComponent();
+		
+		System.out.println(node.getUserObject());
 
 	}
 

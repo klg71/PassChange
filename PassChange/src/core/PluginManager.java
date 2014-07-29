@@ -39,7 +39,6 @@ public class PluginManager {
 //					for (int j=0; j<intf.length; j++) {
 //						if (intf[j].getName().equals("Website")) {
 							// the following line assumes that PluginFunction has a no-argument constructor
-							System.out.println(c.getSuperclass().getName());
 							if(c.getSuperclass().getName().equals("core.Website")){
 								@SuppressWarnings("unchecked")
 								Website pf = (Website) c.newInstance();
@@ -61,7 +60,7 @@ public class PluginManager {
 		Iterator<Website> iter = plugins.iterator();
 		while (iter.hasNext()) {
 			Website pf = (Website) iter.next();
-			System.out.println(pf.getName());
+			
 			
 		}
 	}
