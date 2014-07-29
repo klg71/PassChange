@@ -9,7 +9,15 @@ public abstract class Website {
 		this.pass = pass;
 	}
 
-	public abstract void authenticate();
+	public abstract void authenticate() throws Exception;
 
-	public abstract void changePassword(String newPass);
+	public abstract void changePassword(String newPass) throws Exception;
+	
+	protected abstract void validateAuthentification() throws Exception;
+	
+	protected abstract void validatePasswordChange() throws Exception;
+
+	protected abstract void validatePasswordChange(String newPass) throws Exception ;
+
+	public abstract String getName() ;
 }

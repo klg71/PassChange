@@ -14,11 +14,7 @@ import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
 import java.net.URLDecoder;
-import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.zip.GZIPInputStream;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -99,8 +95,9 @@ public class WebClient {
 
 	}
 
-	public void sendRequest(String url, RequestType type, String body,
+	public String sendRequest(String url, RequestType type, String body,
 			String filename, Boolean ref) {
+		String ret="";
 		System.out.println(filename);
 		FileWriter fileWriter = null;
 		try {
@@ -131,14 +128,14 @@ public class WebClient {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		for (Map.Entry<String, List<String>> entry : connection
-				.getHeaderFields().entrySet()) {
-			// System.out.println(entry.getKey()+":");
-			// for(String value:entry.getValue()){
-			// System.out.print(value);
-			// }
-			// System.out.println();
-		}
+//		for (Map.Entry<String, List<String>> entry : connection
+//				.getHeaderFields().entrySet()) {
+//			// System.out.println(entry.getKey()+":");
+//			// for(String value:entry.getValue()){
+//			// System.out.print(value);
+//			// }
+//			// System.out.println();
+//		}
 		// setCookies();
 
 		List<HttpCookie> cks = cookieStore.getCookies();
@@ -173,7 +170,7 @@ public class WebClient {
 
 		try {
 			for (String line; (line = reader.readLine()) != null;) {
-				System.out.println(line);
+				ret+=line;
 				fileWriter.write(line);
 			}
 		} catch (IOException e) {
@@ -190,6 +187,7 @@ public class WebClient {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		return ret;
 
 	}
 
