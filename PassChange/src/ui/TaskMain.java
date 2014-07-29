@@ -1,7 +1,10 @@
 package ui;
 
+import java.util.ArrayList;
+
 import core.PluginClassLoader;
 import core.PluginManager;
+import core.Website;
 
 public class TaskMain {
 
@@ -29,11 +32,18 @@ public class TaskMain {
 //			// TODO Auto-generated catch block
 //			e.printStackTrace();
 //		}
-		MainFrame mainFrame=new MainFrame();
-		mainFrame.setVisible(true);
 		PluginManager pluginManager=new PluginManager();
-		pluginManager.getPlugins();
+		ArrayList<Website> websites=pluginManager.getPlugins();
+//		try {
+//			websites.get(0).authenticate();
+//		} catch (Exception e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 		pluginManager.runPlugins();
+		
+		MainFrame mainFrame=new MainFrame(websites);
+		mainFrame.setVisible(true);
 		// mysqlManager=new MysqlManager("", "");
 		
 	}

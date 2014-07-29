@@ -41,14 +41,14 @@ public class PluginClassLoader extends ClassLoader {
       try {
         // Our ClassLoader superclass has a built-in cache of classes it has
         // already loaded. So, first check the cache.
-        Class c = findLoadedClass(classname);
+        Class c = findLoadedClass("plugins."+classname);
 
         // After this method loads a class, it will be called again to
         // load the superclasses. Since these may be system classes, we've
         // got to be able to load those too. So try to load the class as
         // a system class (i.e. from the CLASSPATH) and ignore any errors
         if (c == null) {
-          try { c = findSystemClass(classname); }
+          try { c = findSystemClass("plugins."+classname); }
           catch (Exception ex) {}
         }
 
@@ -79,6 +79,7 @@ public class PluginClassLoader extends ClassLoader {
         // If the resolve argument is true, call the inherited resolveClass method.
         if (resolve) resolveClass(c);
 
+        
         // And we're done. Return the Class object we've loaded.
         return c;
       }

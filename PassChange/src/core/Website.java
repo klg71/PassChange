@@ -4,7 +4,9 @@ public abstract class Website {
 	protected String username;
 	protected String pass;
 
-	public Website(String username, String pass) {
+	
+	
+	public void initialize(String username, String pass) {
 		this.username = username;
 		this.pass = pass;
 	}
@@ -20,4 +22,8 @@ public abstract class Website {
 	protected abstract void validatePasswordChange(String newPass) throws Exception ;
 
 	public abstract String getName() ;
+	
+	public abstract String getTopic();
+	
+	public abstract String toString();
 }

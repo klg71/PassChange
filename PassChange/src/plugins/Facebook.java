@@ -16,7 +16,7 @@ public class Facebook extends Website {
 	private String Login;
 
 	public Facebook(String username, String pass) {
-		super(username, pass);
+		initialize(username, pass);
 		webClient = new WebClient();
 //		Scanner scanner = null;
 //		try {
@@ -30,9 +30,14 @@ public class Facebook extends Website {
 //		passwordNew = scanner.nextLine();
 
 	}
+	
+	public Facebook(){
+		super();
+	}
 
 	@Override
 	public void authenticate() throws Exception {
+		System.out.println("test");
 		webClient.sendRequest("https://m.facebook.com/", RequestType.GET, "",
 				"home1", false);
 		System.out.println("");
@@ -122,14 +127,22 @@ public class Facebook extends Website {
 
 	@Override
 	protected void validatePasswordChange(String newPass) throws Exception {
-		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public String getName() {
-		// TODO Auto-generated method stub
 		return "Facebook";
+	}
+
+	@Override
+	public String getTopic() {
+		return "Social";
+	}
+
+	@Override
+	public String toString() {
+		return getName();
 	}
 
 

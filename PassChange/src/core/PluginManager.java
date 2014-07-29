@@ -10,21 +10,19 @@ public class PluginManager {
 	// a list where we keep an initialized object of each plugin class
 	ArrayList<Website> plugins;
 
-	
 
 	public PluginManager() {
 		
 		pluginsDir = "bin\\plugins";
 
 		plugins = new ArrayList<Website>();
-
-		System.setSecurityManager(new PluginSecurityManager(pluginsDir));
+		
 	}
 
 	public ArrayList<Website> getPlugins() {
 		File dir = new File(System.getProperty("user.dir") + File.separator + pluginsDir);
-		System.out.println(System.getProperty("user.dir") + File.separator + pluginsDir);
 		ClassLoader cl = new PluginClassLoader(dir);
+		
 		if (dir.exists() && dir.isDirectory()) {
 			// we'll only load classes directly in this directory -
 			// no subdirectories, and no classes in packages are recognized
@@ -35,17 +33,24 @@ public class PluginManager {
 					if (! files[i].endsWith(".class"))
 						continue;
 					Class c = cl.loadClass(files[i].substring(0, files[i].indexOf(".")));
-					Class[] intf = c.getInterfaces();
-					for (int j=0; j<intf.length; j++) {
-						if (intf[j].getName().equals("Website")) {
+//					Class[] intf = c.getInterfaces();
+//					
+					
+//					for (int j=0; j<intf.length; j++) {
+//						if (intf[j].getName().equals("Website")) {
 							// the following line assumes that PluginFunction has a no-argument constructor
-							Website pf = (Website) c.newInstance();
-							plugins.add(pf);
-							continue;
-						}
-					}
+							System.out.println(c.getSuperclass().getName());
+							if(c.getSuperclass().getName().equals("core.Website")){
+								@SuppressWarnings("unchecked")
+								Website pf = (Website) c.newInstance();
+								plugins.add(pf);
+							}
+							//continue;
+						//}
+					//}
 				} catch (Exception ex) {
-					System.err.println("File " + files[i] + " does not contain a valid PluginFunction class.");
+					System.err.println("File " + files[i] + " does not contain a valid Website class.");
+					ex.printStackTrace();
 				}
 			}
 		}
@@ -56,7 +61,8 @@ public class PluginManager {
 		Iterator<Website> iter = plugins.iterator();
 		while (iter.hasNext()) {
 			Website pf = (Website) iter.next();
-			pf.getName();
+			System.out.println(pf.getName());
+			
 		}
 	}
 }

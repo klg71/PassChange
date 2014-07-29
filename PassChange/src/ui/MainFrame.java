@@ -2,6 +2,10 @@ package ui;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -9,6 +13,8 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
+
+import core.Website;
 
 public class MainFrame extends JFrame implements ActionListener {
 	/**
@@ -19,49 +25,65 @@ public class MainFrame extends JFrame implements ActionListener {
 	private JMenu menuFile;
 	private JMenuItem menuItemClose;
 	private JTree websiteTree;
-	
-	public MainFrame(){
+	private ArrayList<Website> websites;
+
+	public MainFrame(ArrayList<Website> websites) {
+		this.websites = websites;
+
 		setSize(500, 500);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
-		
-		menuBar=new JMenuBar();
-		menuFile=new JMenu("File");
-		
+
+		menuBar = new JMenuBar();
+		menuFile = new JMenu("File");
+
 		menuBar.add(menuFile);
-		menuItemClose=new JMenuItem("Close");
+		menuItemClose = new JMenuItem("Close");
 		menuFile.add(menuItemClose);
 		menuItemClose.addActionListener(this);
-		
+
 		this.setJMenuBar(menuBar);
-		DefaultMutableTreeNode top =
-		        new DefaultMutableTreeNode("Websites");
-		    createNodes(top);
-		
-		
-		websiteTree=new JTree(top);
+		DefaultMutableTreeNode top = new DefaultMutableTreeNode("Websites");
+		createNodes(top);
+
+		websiteTree = new JTree(top);
 		add(websiteTree);
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
-		if(arg0.getSource()==menuItemClose){
+		if (arg0.getSource() == menuItemClose) {
 			this.setVisible(false);
 			dispose();
 		}
-		
+
 	}
-	
+
 	private void createNodes(DefaultMutableTreeNode top) {
-	    DefaultMutableTreeNode category = null;
-	    DefaultMutableTreeNode book = null;
-	    
-	    category = new DefaultMutableTreeNode("Books for Java Programmers");
-	    top.add(category);
-	    
-	    //original Tutorial
-	    book = new DefaultMutableTreeNode("The Java Tutorial: A Short Course on the Basics"+
-	        "tutorial.html");
-	    category.add(book);
+		
+		
+		HashMap<String,ArrayList<Website>> websiteMap=new HashMap<String,ArrayList<Website>>();
+		
+		DefaultMutableTreeNode category = null;
+		DefaultMutableTreeNode book = null;
+		for (Website website : websites) {
+			if(websiteMap.containsKey(website.getTopic())){
+				websiteMap.get(website.getTopic()).add(website);
+			} else {
+				ArrayList<Website> temp=new ArrayList<Website>();
+				temp.add(website);
+				websiteMap.put(website.getTopic(), temp);
+			}
+		}
+		
+
+		for(Entry<String, ArrayList<Website>> entry:websiteMap.entrySet()){
+			category = new DefaultMutableTreeNode(entry.getKey());
+			top.add(category);
+			for(Website site : entry.getValue()){
+				category.add(new DefaultMutableTreeNode(site));
+			}
+		}
+
 	}
-	
+
 }
