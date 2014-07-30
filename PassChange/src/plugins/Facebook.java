@@ -37,7 +37,6 @@ public class Facebook extends Website {
 
 	@Override
 	public void authenticate() throws Exception {
-		System.out.println("test");
 		webClient.sendRequest("https://m.facebook.com/", RequestType.GET, "",
 				"home1", false);
 		System.out.println("");

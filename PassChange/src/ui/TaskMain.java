@@ -14,46 +14,63 @@ import java.security.NoSuchAlgorithmException;
 import java.security.Provider;
 import java.security.Security;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Scanner;
 
+import account.AccountManager;
 import core.Crypt;
 import core.PluginClassLoader;
 import core.PluginManager;
 import core.Website;
+import file.XmlParser;
 
 public class TaskMain {
 
 	public static void main(String[] args) {
-		//for (Provider p : Security.getProviders()) System.out.println(p.getName());
 		
-		String key="123457678";
+		String key="Password";
 		
 		String md5= Crypt.generateMd5(key);
 		System.out.println(md5);
 		OutputStream file = null;
 		try {
-			file = new FileOutputStream(new File("test.txt"));
+			file = new FileOutputStream(new File("accounts.xmls"));
 		} catch (FileNotFoundException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
+		Scanner scanner = null;
 		try {
-			Crypt.encode("Hello World".getBytes(), file,md5);
+			scanner = new Scanner(new File("accounts.xml"));
+		} catch (FileNotFoundException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		String content="";
+		while(scanner.hasNextLine())
+			content+=scanner.nextLine();
+		try {
+			Crypt.encode(content.getBytes(), file,md5);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		try {
-			System.out.println(new String(Crypt.decode(new FileInputStream(new File("test.txt")), md5)));
+			System.out.println(new String(Crypt.decode(new FileInputStream(new File("accounts.xmls")), md5)));
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		PluginManager pluginManager=new PluginManager();
-		ArrayList<Website> websites=pluginManager.getPlugins();
-
-		pluginManager.runPlugins();
 		
-		MainFrame mainFrame=new MainFrame(websites);
+		
+		PluginManager pluginManager=new PluginManager();
+		HashMap<String,Website> websites=pluginManager.getPlugins();
+
+		
+		AccountManager accountManager=new AccountManager("accounts.xmls", key, websites);
+		accountManager.loadFromFile();
+		
+		MainFrame mainFrame=new MainFrame(websites,accountManager);
 		mainFrame.setVisible(true);
 		// mysqlManager=new MysqlManager("", "");
 		

@@ -8,18 +8,18 @@ public class PluginManager {
 	String pluginsDir;
 
 	// a list where we keep an initialized object of each plugin class
-	ArrayList<Website> plugins;
+	HashMap<String,Website> plugins;
 
 
 	public PluginManager() {
 		
 		pluginsDir = "bin\\plugins";
 
-		plugins = new ArrayList<Website>();
+		plugins = new HashMap<String,Website>();
 		
 	}
 
-	public ArrayList<Website> getPlugins() {
+	public HashMap<String,Website> getPlugins() {
 		File dir = new File(System.getProperty("user.dir") + File.separator + pluginsDir);
 		ClassLoader cl = new PluginClassLoader(dir);
 		
@@ -42,7 +42,7 @@ public class PluginManager {
 							if(c.getSuperclass().getName().equals("core.Website")){
 								@SuppressWarnings("unchecked")
 								Website pf = (Website) c.newInstance();
-								plugins.add(pf);
+								plugins.put(pf.getName(),pf);
 							}
 							//continue;
 						//}
@@ -56,12 +56,4 @@ public class PluginManager {
 		return plugins;
 	}
 
-	public void runPlugins() {
-		Iterator<Website> iter = plugins.iterator();
-		while (iter.hasNext()) {
-			Website pf = (Website) iter.next();
-			
-			
-		}
-	}
 }

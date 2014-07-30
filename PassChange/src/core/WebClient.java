@@ -8,6 +8,7 @@ import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.CookieHandler;
 import java.net.CookieManager;
+import java.net.CookiePolicy;
 import java.net.CookieStore;
 import java.net.HttpCookie;
 import java.net.MalformedURLException;
@@ -32,8 +33,10 @@ public class WebClient {
 		super();
 		ref = false;
 		cookieManager = new CookieManager();
+		cookieManager.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
 		CookieHandler.setDefault(cookieManager);
 		cookieStore = cookieManager.getCookieStore();
+		
 	}
 
 	private void initConnection() {
@@ -64,9 +67,8 @@ public class WebClient {
 
 		connection.setUseCaches(false);
 		connection.setRequestProperty("host", url.getHost());
-		System.out.println(url.getHost());
 		if (ref) {
-			// connection.setRequestProperty("Referer","https://m.facebook.com/composer/?sbu=%2Fa%2Fhome.php&fin=status&csid=94f06c50-debe-44da-a8fb-7c11fb3b80a5&cwevent=composer_entry&referrer=feed&hash=AZs4fvwVBMiOyz6M&refid=7");
+			 connection.setRequestProperty("Referer","	https://twitter.com/login");
 		}
 		if (type == RequestType.POST) {
 			connection.setRequestProperty("Content-Length",
@@ -128,6 +130,7 @@ public class WebClient {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		System.out.println(connection.getHeaderField("Status"));
 //		for (Map.Entry<String, List<String>> entry : connection
 //				.getHeaderFields().entrySet()) {
 //			// System.out.println(entry.getKey()+":");
@@ -136,8 +139,7 @@ public class WebClient {
 //			// }
 //			// System.out.println();
 //		}
-		// setCookies();
-
+		// setCookies();s
 		List<HttpCookie> cks = cookieStore.getCookies();
 		for (HttpCookie ck : cks) {
 			try {
