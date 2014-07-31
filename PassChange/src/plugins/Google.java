@@ -29,12 +29,6 @@ public class Google extends Website {
 	}
 
 	@Override
-	protected void validatePasswordChange(String newPass) throws Exception {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
 	public String getName() {
 		// TODO Auto-generated method stub
 		return "Google";

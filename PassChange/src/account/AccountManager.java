@@ -38,6 +38,16 @@ public class AccountManager {
 		accounts.add(newAccount);
 	}
 	
+	public void removeAccount(String website,String accountName){
+		int i=-1;
+		for(Account account:accounts){
+			if(account.getWebsite().toString().equals(website)&&account.getUserName().equals(accountName)){
+				i=accounts.indexOf(account);
+			}
+		}
+		accounts.remove(i);
+	}
+	
 	public ArrayList<Account> getAccounts(){
 		return accounts;
 	}

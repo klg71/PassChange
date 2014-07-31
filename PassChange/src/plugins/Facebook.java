@@ -18,17 +18,8 @@ public class Facebook extends Website {
 	public Facebook(String username, String pass) {
 		initialize(username, pass);
 		webClient = new WebClient();
-//		Scanner scanner = null;
-//		try {
-//			scanner = new Scanner(new File("passwords"));
-//		} catch (FileNotFoundException e1) {
-//			e1.printStackTrace();
-//		}
 		fb_dtsg = "";
 		charset_test = "";
-//		password = scanner.nextLine();
-//		passwordNew = scanner.nextLine();
-
 	}
 	
 	public Facebook(){
@@ -88,7 +79,7 @@ public class Facebook extends Website {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		validatePasswordChange(passwordNew);
+		validatePasswordChange();
 
 	}
 
@@ -121,11 +112,6 @@ public class Facebook extends Website {
 			pass=tempPass;
 			throw new Exception ("Change Password unsuccessful please try again");
 		}
-		
-	}
-
-	@Override
-	protected void validatePasswordChange(String newPass) throws Exception {
 		
 	}
 

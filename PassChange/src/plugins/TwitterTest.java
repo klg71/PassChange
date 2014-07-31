@@ -9,7 +9,7 @@ public class TwitterTest {
 	private Twitter twitter;
 	@Before
 	public void setUp() throws Exception {
-		twitter=new Twitter("","");
+		twitter=new Twitter("klg71","***REMOVED***");
 	}
 
 	@Test
@@ -24,22 +24,13 @@ public class TwitterTest {
 
 	@Test
 	public void testChangePassword() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testValidateAuthentification() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testValidatePasswordChange() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testValidatePasswordChangeString() {
-		fail("Not yet implemented");
+		try {
+			twitter.authenticate();
+			twitter.changePassword("***REMOVED***");
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			fail(e.getMessage());
+		}
 	}
 
 }

@@ -13,62 +13,93 @@ public class Twitter extends Website {
 	private WebClient webClient;
 	private String token;
 	private String body;
-
+	private String passwordNew;
+	
 	public Twitter(String username, String pass) {
 		initialize(username, pass);
 		webClient = new WebClient();
 		token = "";
+		passwordNew="";
+	}
+	public Twitter(){
+		super();
 	}
 
 	@Override
 	public void authenticate() throws Exception {
-		webClient.sendRequest("https://twitter.com/", RequestType.GET, "",
-				"home2", false);
-		body = webClient.sendRequest("https://twitter.com/login/",
-				RequestType.GET, "", "home1", true);
-		System.out.println(URLEncoder.encode(pass, "UTF-8"));
-		String post=URLEncoder.encode("session[username_or_email]", "UTF-8") + "="
+		//webClient.sendRequest("https://twitter.com/", RequestType.GET, "",
+		//		"home2", false);
+		System.out.println();
+		body = webClient.sendRequest("https://mobile.twitter.com/session/",
+				RequestType.GET, "", "home3", false);
+		System.out.println();
+		getToken();
+		System.out.println(token);
+		String post=URLEncoder.encode("username", "UTF-8") + "="
 				+ URLEncoder.encode(username, "UTF-8") + "&"
-				+ URLEncoder.encode("session[password]", "UTF-8") + "="
+				+ URLEncoder.encode("password", "UTF-8") + "="
 				+ URLEncoder.encode(pass, "UTF-8")
-				+ "&authenticity_token="
-				+ URLEncoder.encode(token, "UTF-8")
-				+ "&scribe_log=&redirect_after_login="
-				+ "&authenticity_token="
+				+ "&submit=submit&authenticity_token="
 				+ URLEncoder.encode(token, "UTF-8");
-		body = webClient.sendRequest(
-				"https://twitter.com/sessions",
-				RequestType.POST,post, "twitter1", true);
 		
 		System.out.println(post);
-		webClient.sendRequest("https://twitter.com/", RequestType.GET, "",
+		System.out.println();
+		body = webClient.sendRequest(
+				"https://mobile.twitter.com/session/",
+				RequestType.POST,post, "twitter1", false);
+		System.out.println();
+		validateAuthentification();
+		body=webClient.sendRequest("https://mobile.twitter.com/settings/password", RequestType.GET, "",
 				"home2", false);
 
 	}
 
 	@Override
 	public void changePassword(String newPass) throws Exception {
-		// TODO Auto-generated method stub
+
+		passwordNew=newPass;
+		getToken();
+		System.out.println(token);
+		String post= URLEncoder.encode("settings[current_password]", "UTF-8") + "="
+				+ URLEncoder.encode(pass, "UTF-8")
+				+ "&settings[password]="
+				+ URLEncoder.encode(newPass, "UTF-8")
+				+ "&settings[password_confirmation]="
+				+ URLEncoder.encode(newPass, "UTF-8")
+				+ "&authenticity_token="
+				+ URLEncoder.encode(token, "UTF-8");
+		
+		System.out.println(post);
+		System.out.println();
+		body = webClient.sendRequest(
+				"https://mobile.twitter.com//settings/password/",
+				RequestType.POST,post, "pwChange", false);
+		validatePasswordChange();
 
 	}
 
 	@Override
 	protected void validateAuthentification() throws Exception {
-		// TODO Auto-generated method stub
+		if(body.indexOf("signup-field")>0) {
+			throw new Exception("Login unsuccsessful please try again");
+		}
 
 	}
 
 	@Override
 	protected void validatePasswordChange() throws Exception {
-		// TODO Auto-generated method stub
+		String tempPass=pass;
+		pass=passwordNew;
+		try {
+			authenticate();
+		} catch (Exception e) {
+			pass=tempPass;
+			throw new Exception ("Change Password unsuccessful please try again");
+		}
 
 	}
 
-	@Override
-	protected void validatePasswordChange(String newPass) throws Exception {
-		// TODO Auto-generated method stub
-
-	}
+	
 
 	@Override
 	public String getName() {
@@ -89,13 +120,12 @@ public class Twitter extends Website {
 	}
 
 	private void getToken() {
-		Pattern pattern = Pattern.compile("([a-f0-9]{40})");
+		Pattern pattern = Pattern.compile("\"([a-f0-9]{20})\"");
 		Matcher m = pattern.matcher(body);
 		while (m.find()) {
-			token = m.group(1);
+			token = m.group(1).substring(0,m.group(1).length());
 			// s now contains "BAR"
 		}
-		System.out.println(token);
 	}
 
 }
