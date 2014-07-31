@@ -11,7 +11,7 @@ public class FacebookTest {
 	
 	@Before
 	public void setUp() throws Exception {
-		facebook=new Facebook("klg71@web.de", "***REMOVED***");
+		facebook=new Facebook("", "");
 	}
 
 	@Test
@@ -29,7 +29,7 @@ public class FacebookTest {
 	public void testChangePassword() {
 		try {
 			facebook.authenticate();
-			facebook.changePassword("***REMOVED***");
+			facebook.changePassword("");
 		} catch (Exception e) {
 
 			fail(e.getMessage());
