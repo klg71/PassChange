@@ -9,7 +9,7 @@ public class TwitterTest {
 	private Twitter twitter;
 	@Before
 	public void setUp() throws Exception {
-		twitter=new Twitter("klg71","***REMOVED***");
+		twitter=new Twitter("","");
 	}
 
 	@Test
@@ -26,7 +26,7 @@ public class TwitterTest {
 	public void testChangePassword() {
 		try {
 			twitter.authenticate();
-			twitter.changePassword("***REMOVED***");
+			twitter.changePassword("");
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			fail(e.getMessage());
