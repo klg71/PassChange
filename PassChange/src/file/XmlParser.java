@@ -3,33 +3,40 @@ package file;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map.Entry;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
 import org.w3c.dom.Document;
-import org.w3c.dom.Node;
+import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import account.Account;
+import account.AccountManager;
 import core.Crypt;
 import core.Website;
 
 public class XmlParser {
 	private HashMap<String, Website> websites;
-
 	public XmlParser(HashMap<String, Website> websites) {
 		this.websites = websites;
 	}
 
 	public ArrayList<Account> loadAccountsFromFile(String filename,
-			String password) {
+			String password) throws Exception {
 		ArrayList<Account> accounts = new ArrayList<Account>();
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder builder = null;
@@ -52,11 +59,9 @@ public class XmlParser {
 			document = builder.parse(new ByteArrayInputStream(content
 					.getBytes()));
 		} catch (SAXException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new Exception("You maybe entered a wrong password. Please try again.");
 		}
 		System.out.println(document.getFirstChild().getNodeName());
 		NodeList nodeList = document.getFirstChild().getChildNodes();
@@ -89,8 +94,57 @@ public class XmlParser {
 	}
 
 	public void saveAccountsToFile(String filename, String password,
-			ArrayList<Account> accounts) {
-
+			AccountManager accountManager) {
+		 try {
+			 
+				DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+				DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+		 
+				// root elements
+				Document doc = docBuilder.newDocument();
+				Element rootElement = doc.createElement("websites");
+				doc.appendChild(rootElement);
+		 
+				// staff elements
+				for(Entry<String, ArrayList<Account>> entry:accountManager.getAccountMap().entrySet()){
+					Element website = doc.createElement("website");
+					website.setAttribute("name", entry.getKey());
+					for(Account account:entry.getValue()){
+						Element accountElement=doc.createElement("account");
+						accountElement.setAttribute("name", account.getUserName());
+						accountElement.setAttribute("email", account.getEmail());
+						accountElement.setAttribute("pass", account.getActualPassword());
+						website.appendChild(accountElement);
+					}
+					rootElement.appendChild(website);
+				}
+				
+		 
+		 
+				// write the content into xml file
+				TransformerFactory transformerFactory = TransformerFactory.newInstance();
+				Transformer transformer = transformerFactory.newTransformer();
+				DOMSource source = new DOMSource(doc);
+				System.out.println(source.toString());
+				StringWriter stringWriter=new StringWriter();
+				StreamResult result = new StreamResult(stringWriter);
+			
+				// Output to console for testing
+				// StreamResult result = new StreamResult(System.out);
+	
+				transformer.transform(source, result);
+				try {
+					Crypt.encode(stringWriter.toString().getBytes(), new FileOutputStream(new File(filename)),Crypt.generateMd5( password));
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+		 
+			  } catch (ParserConfigurationException pce) {
+				pce.printStackTrace();
+			  } catch (TransformerException tfe) {
+				tfe.printStackTrace();
+			  }
 	}
 
 }

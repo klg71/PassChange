@@ -22,12 +22,12 @@ public class AccountManager {
 		
 	}
 	
-	public void loadFromFile(){
+	public void loadFromFile() throws Exception{
 		accounts=xmlParser.loadAccountsFromFile(accountFile,masterPass);
 	}
 	
 	public void writeToFile(){
-		xmlParser.saveAccountsToFile(accountFile,masterPass,accounts);
+		xmlParser.saveAccountsToFile(accountFile,masterPass,this);
 	}
 	
 	public void exportAccounts(String filename){
@@ -46,6 +46,16 @@ public class AccountManager {
 			}
 		}
 		accounts.remove(i);
+	}
+	
+	public Account findAccount(String website,String accountName){
+		int i=-1;
+		for(Account account:accounts){
+			if(account.getWebsite().toString().equals(website)&&account.getUserName().equals(accountName)){
+				i=accounts.indexOf(account);
+			}
+		}
+		return accounts.get(i);
 	}
 	
 	public ArrayList<Account> getAccounts(){

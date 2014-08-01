@@ -1,5 +1,6 @@
 package ui;
 
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.HashMap;
@@ -17,11 +18,14 @@ import account.Account;
 import account.AccountManager;
 
 public class NewEntryFrame extends JFrame implements ActionListener {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	private AccountManager accountManager;
 
-	private JPanel usernamePanel;
-	private JPanel emailPanel;
-	private JPanel passwordPanel;
+	private JPanel gridPanel;
 	private JPanel submitPanel;
 	private JPanel mainPanel;
 	
@@ -29,6 +33,7 @@ public class NewEntryFrame extends JFrame implements ActionListener {
 	private JTextField emailTextField;
 	private JPasswordField passwordTextField;
 	private JButton submitButton;
+	private GridLayout gridLayout;
 	
 	private String website;
 	private HashMap<String, Website> websites;
@@ -39,32 +44,27 @@ public class NewEntryFrame extends JFrame implements ActionListener {
 		this.websites=websites;
 		setTitle("Create new Entry");
 		setSize(300, 200);
+		
+		gridLayout=new GridLayout(0,2);
+		gridLayout.setVgap(10);
+		gridPanel=new JPanel(gridLayout);
+		
 		mainPanel=new JPanel();
 		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 		
-		usernamePanel=new JPanel();
-		usernamePanel.setLayout(new BoxLayout(usernamePanel, BoxLayout.X_AXIS));
-		usernamePanel.add(new JLabel("Username:"));
+		gridPanel.add(new JLabel("Username:"));
 		usernameTextField=new JTextField();
-		usernamePanel.add(usernameTextField);
+		gridPanel.add(usernameTextField);
 		
-		mainPanel.add(usernamePanel);
-		
-		emailPanel=new JPanel();
-		emailPanel.setLayout(new BoxLayout(emailPanel, BoxLayout.X_AXIS));
-		emailPanel.add(new JLabel("email:"));
+		gridPanel.add(new JLabel("email:"));
 		emailTextField=new JTextField();
-		emailPanel.add(emailTextField);
+		gridPanel.add(emailTextField);
 		
-		mainPanel.add(emailPanel);
-		
-		passwordPanel=new JPanel();
-		passwordPanel.setLayout(new BoxLayout(passwordPanel, BoxLayout.X_AXIS));
-		passwordPanel.add(new JLabel("Password:"));
+		gridPanel.add(new JLabel("Password:"));
 		passwordTextField=new JPasswordField();
-		passwordPanel.add(passwordTextField);
+		gridPanel.add(passwordTextField);
 		
-		mainPanel.add(passwordPanel);
+		mainPanel.add(gridPanel);
 		
 		submitPanel=new JPanel();
 		submitPanel.setLayout(new BoxLayout(submitPanel, BoxLayout.X_AXIS));
@@ -80,7 +80,7 @@ public class NewEntryFrame extends JFrame implements ActionListener {
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
 		if(arg0.getSource().equals(submitButton)){
-			accountManager.addAccount(new Account(usernameTextField.getText(), emailTextField.getText(), passwordTextField.getPassword().toString(), websites.get(website)));
+			accountManager.addAccount(new Account(usernameTextField.getText(), emailTextField.getText(),new String( passwordTextField.getPassword()), websites.get(website)));
 			this.setVisible(false);
 			dispose();
 		}

@@ -2,15 +2,10 @@ package ui;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
-import java.awt.ComponentOrientation;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.LayoutManager;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ComponentEvent;
-import java.awt.event.ComponentListener;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -18,10 +13,10 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Map.Entry;
 
 import javax.swing.BoxLayout;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -29,17 +24,13 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
-import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTree;
-import javax.swing.event.AncestorEvent;
-import javax.swing.event.AncestorListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 
-import account.Account;
 import account.AccountManager;
 import core.Website;
 
@@ -51,7 +42,7 @@ public class MainFrame extends JFrame implements ActionListener,
 	private static final long serialVersionUID = -4987061042842924977L;
 	private JMenuBar menuBar;
 	private JMenu menuFile;
-	private JMenuItem menuItemClose;
+	private JMenuItem menuItemClose,menuItemOpen,menuItemSave;
 	private JPanel mainPanel;
 	private JTree websiteTree;
 	private JScrollPane treeScrollPane, tableScrollPane;
@@ -79,9 +70,17 @@ public class MainFrame extends JFrame implements ActionListener,
 		menuFile = new JMenu("File");
 
 		menuBar.add(menuFile);
+		menuItemOpen = new JMenuItem("Open");
+		menuItemSave = new JMenuItem("Save");
 		menuItemClose = new JMenuItem("Close");
 		menuFile.add(menuItemClose);
+		menuFile.add(menuItemOpen);
+		menuFile.add(menuItemSave);
+		
+		menuItemOpen.addActionListener(this);
+		menuItemSave.addActionListener(this);
 		menuItemClose.addActionListener(this);
+		
 
 		this.setJMenuBar(menuBar);
 
@@ -117,13 +116,7 @@ public class MainFrame extends JFrame implements ActionListener,
 		deleteEntry.addActionListener(this);
 		popupMenu.add(deleteEntry);
 		changePassword = new JMenuItem("Change Password");
-		changePassword.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-
-			}
-		});
+		changePassword.addActionListener(this);
 		popupMenu.add(changePassword);
 
 	}
@@ -133,6 +126,17 @@ public class MainFrame extends JFrame implements ActionListener,
 		if (arg0.getSource() == menuItemClose) {
 			this.setVisible(false);
 			dispose();
+		}
+		if(arg0.getSource()==menuItemSave){
+			accountManager.writeToFile();
+		}
+		if(arg0.getSource()==menuItemOpen){
+			OpenAccountDialog dialog=new OpenAccountDialog(websites, this);
+			dialog.setVisible(true);
+		}
+		if(arg0.getSource()==changePassword){
+			new ChangePasswordFrame(accountManager.findAccount(activeWebsite, accountTableModell
+						.getValueAt(0, clickedRow).toString())).setVisible(true);;
 		}
 		if (arg0.getSource() == deleteEntry) {
 			if (JOptionPane.showConfirmDialog((Component) arg0.getSource(),
@@ -273,6 +277,14 @@ public class MainFrame extends JFrame implements ActionListener,
 	@Override
 	public void windowOpened(WindowEvent arg0) {
 		// TODO Auto-generated method stub
+		
+	}
+
+	public void setAccountManager(AccountManager accountManager) {
+		this.accountManager=accountManager;
+
+		accountTableModell = new AccountTableModell(accountManager);
+		accountTable.setModel(accountTableModell);
 		
 	}
 
