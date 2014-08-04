@@ -212,7 +212,7 @@ public class WebClient {
 		try {
 			for (String line; (line = reader.readLine()) != null;) {
 				ret += line;
-				fileWriter.write(line);
+				fileWriter.write(line+System.getProperty("line.separator"));
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -360,6 +360,10 @@ public class WebClient {
 			return false;
 		}
 
+	}
+	
+	public String getCookie(String domain,String name){
+		return (String) ((Map)((Map) store.get(domain)).get(name)).get(name);
 	}
 
 }

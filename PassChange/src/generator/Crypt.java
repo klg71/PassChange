@@ -1,4 +1,4 @@
-package core;
+package generator;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;

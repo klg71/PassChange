@@ -1,5 +1,7 @@
 package file;
 
+import generator.Crypt;
+
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -26,7 +28,6 @@ import org.xml.sax.SAXException;
 
 import account.Account;
 import account.AccountManager;
-import core.Crypt;
 import core.Website;
 
 public class XmlParser {

@@ -17,19 +17,39 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Scanner;
 
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
+
 import account.AccountManager;
-import core.Crypt;
 import core.PluginClassLoader;
 import core.PluginManager;
 import core.Website;
 import file.XmlParser;
+import generator.Crypt;
 
 public class TaskMain {
 
 	public static void main(String[] args) {
 		
 		String key="Password";
-		
+		  try {
+	            // Set cross-platform Java L&F (also called "Metal")
+	        UIManager.setLookAndFeel(
+	            UIManager.getSystemLookAndFeelClassName());
+	    } 
+	    catch (UnsupportedLookAndFeelException e) {
+	       // handle exception
+	    }
+	    catch (ClassNotFoundException e) {
+	       // handle exception
+	    }
+	    catch (InstantiationException e) {
+	       // handle exception
+	    }
+	    catch (IllegalAccessException e) {
+	       // handle exception
+	    }
+	      
 //		String md5= Crypt.generateMd5(key);
 //		System.out.println(md5);
 //		OutputStream file = null;
