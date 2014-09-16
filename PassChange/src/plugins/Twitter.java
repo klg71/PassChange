@@ -1,6 +1,7 @@
 package plugins;
 
 import java.net.URLEncoder;
+import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -23,6 +24,13 @@ public class Twitter extends Website {
 	}
 	public Twitter(){
 		super();
+	}
+	
+	public void initialize(String username, String password){
+		super.initialize(username, password);
+		webClient = new WebClient();
+		token = "";
+		passwordNew="";
 	}
 
 	@Override

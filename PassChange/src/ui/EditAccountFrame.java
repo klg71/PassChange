@@ -5,11 +5,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 
-import javax.print.attribute.standard.JobName;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -22,7 +19,7 @@ import core.Website;
 import account.Account;
 import account.AccountManager;
 
-public class NewEntryFrame extends JFrame implements ActionListener, KeyListener {
+public class EditAccountFrame extends JFrame implements KeyListener, ActionListener {
 	/**
 	 * 
 	 */
@@ -41,14 +38,11 @@ public class NewEntryFrame extends JFrame implements ActionListener, KeyListener
 	private JButton submitButton;
 	private GridLayout gridLayout;
 	
-	private String website;
-	private HashMap<String, Website> websites;
+	private Account account;
 	
-	public NewEntryFrame(AccountManager accountManager,String website,HashMap<String, Website> websites){
-		this.accountManager=accountManager;
-		this.website=website;
-		this.websites=websites;
-		setTitle("Create new Entry");
+	public EditAccountFrame(Account account){
+		this.account=account;
+		setTitle("Edit Entry");
 		setSize(300, 200);
 		
 		gridLayout=new GridLayout(0,2);
@@ -59,22 +53,21 @@ public class NewEntryFrame extends JFrame implements ActionListener, KeyListener
 		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 		
 		gridPanel.add(new JLabel("Username:"));
-		usernameTextField=new JTextField();
+		usernameTextField=new JTextField(account.getUserName());
 		gridPanel.add(usernameTextField);
 		
 		gridPanel.add(new JLabel("Email:"));
-		emailTextField=new JTextField();
+		emailTextField=new JTextField(account.getEmail());
 		gridPanel.add(emailTextField);
 		
 		gridPanel.add(new JLabel("Password:"));
-		passwordTextField=new JPasswordField();
+		passwordTextField=new JPasswordField(account.getActualPassword());
 		gridPanel.add(passwordTextField);
 		
-		
 		gridPanel.add(new JLabel("Expire:"));
-		expireTextField=new JTextField();
-		expireTextField.addKeyListener(this);
+		expireTextField=new JTextField(Integer.toString(account.getExpire()));
 		gridPanel.add(expireTextField);
+		expireTextField.addKeyListener(this);
 		
 		mainPanel.add(gridPanel);
 		
@@ -92,10 +85,10 @@ public class NewEntryFrame extends JFrame implements ActionListener, KeyListener
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
 		if(arg0.getSource().equals(submitButton)){
-			Calendar tempCalendar = Calendar.getInstance();
-				Date tempDate = new Date();
-				tempCalendar.setTime(tempDate);
-			accountManager.addAccount(new Account(usernameTextField.getText(), emailTextField.getText(),new String( passwordTextField.getPassword()),tempCalendar ,websites.get(website),Integer.parseInt(expireTextField.getText().toString())));
+			account.setUserName(usernameTextField.getText().toString());
+			account.setEmail(emailTextField.getText().toString());
+			account.setActualPassword(new String(passwordTextField.getPassword()));
+			account.setExpire(Integer.parseInt(expireTextField.getText().toString()));
 			this.setVisible(false);
 			dispose();
 		}

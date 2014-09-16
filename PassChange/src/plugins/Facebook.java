@@ -2,6 +2,7 @@ package plugins;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.HashMap;
 
 import core.RequestType;
 import core.WebClient;
@@ -17,11 +18,15 @@ public class Facebook extends Website {
 
 	public Facebook(String username, String pass) {
 		initialize(username, pass);
+	}
+
+	
+	public void initialize(String username, String password){
+		super.initialize(username, password);
 		webClient = new WebClient();
 		fb_dtsg = "";
 		charset_test = "";
 	}
-	
 	public Facebook(){
 		super();
 	}

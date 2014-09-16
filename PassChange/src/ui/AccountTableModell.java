@@ -1,11 +1,16 @@
 package ui;
 
+import java.text.DateFormat;
 import javax.swing.table.AbstractTableModel;
 
 import account.AccountManager;
 
 public class AccountTableModell extends AbstractTableModel {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private AccountManager accountManager;
 	private String Website;
 
@@ -35,6 +40,10 @@ public class AccountTableModell extends AbstractTableModel {
 
 	@Override
 	public Object getValueAt(int arg0, int arg1) {
+		DateFormat df;
+		df = DateFormat.getDateTimeInstance( /* dateStyle */ DateFormat.FULL,
+		                                     /* timeStyle */ DateFormat.MEDIUM );
+
 		switch (arg1) {
 		case 0: {
 			return accountManager.getAccountMap().get(Website).get(arg0).getUserName();
@@ -46,7 +55,7 @@ public class AccountTableModell extends AbstractTableModel {
 			return accountManager.getAccountMap().get(Website).get(arg0).getActualPassword();
 		}
 		case 3: {
-			return accountManager.getAccountMap().get(Website).get(arg0).getLastChanged();
+			return df.format(accountManager.getAccountMap().get(Website).get(arg0).getLastChangedCalendar().getTime());
 		}
 		}
 		return null;

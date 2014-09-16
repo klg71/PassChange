@@ -58,8 +58,9 @@ public class ChangePasswordFrame extends JFrame implements ActionListener,
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		try {
-			account.getWebsite().changePassword(
-					new String(passwordField.getPassword()));
+			account.changePassword(new String(passwordField.getPassword()));
+			setVisible(false);
+			dispose();
 		} catch (Exception e1) {
 			JOptionPane.showMessageDialog(this, e1.getMessage());
 			e1.printStackTrace();
@@ -71,8 +72,8 @@ public class ChangePasswordFrame extends JFrame implements ActionListener,
 	public void keyPressed(KeyEvent arg0) {
 		if (arg0.getExtendedKeyCode() == KeyEvent.VK_ENTER) {
 			try {
-				account.getWebsite().changePassword(
-						new String(passwordField.getPassword()));
+				account.changePassword(new String(passwordField.getPassword()));
+				setVisible(false);
 			} catch (Exception e1) {
 				JOptionPane.showMessageDialog(this, e1.getMessage());
 				e1.printStackTrace();

@@ -15,6 +15,7 @@ import java.security.Provider;
 import java.security.Security;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Properties;
 import java.util.Scanner;
 
 import javax.swing.UIManager;
@@ -30,6 +31,22 @@ import generator.Crypt;
 public class TaskMain {
 
 	public static void main(String[] args) {
+		
+		Properties properties=new Properties();
+		if(new File("config").exists()){
+			try {
+				properties.load(new FileInputStream(new File("config")));
+			} catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		} else {
+			properties.setProperty("MysqlEnabled","0");
+		}
+		
 		
 		String key="Password";
 		  try {

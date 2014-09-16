@@ -82,4 +82,10 @@ public class AccountManager {
 		return accountMap;
 		
 	}
+
+	public void writeToFile(String string, String file) {
+
+		xmlParser.saveAccountsToFile(file,string,this);
+		
+	}
 }

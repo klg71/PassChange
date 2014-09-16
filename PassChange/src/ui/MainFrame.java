@@ -41,8 +41,8 @@ public class MainFrame extends JFrame implements ActionListener,
 	 */
 	private static final long serialVersionUID = -4987061042842924977L;
 	private JMenuBar menuBar;
-	private JMenu menuFile;
-	private JMenuItem menuItemClose,menuItemOpen,menuItemSave;
+	private JMenu menuFile, menuAccount, menuSettings, menuInfo;
+	private JMenuItem menuItemClose, menuItemOpen, menuItemSave;
 	private JPanel mainPanel;
 	private JTree websiteTree;
 	private JScrollPane treeScrollPane, tableScrollPane;
@@ -51,9 +51,11 @@ public class MainFrame extends JFrame implements ActionListener,
 	private AccountManager accountManager;
 	private AccountTableModell accountTableModell;
 	private JPopupMenu popupMenu;
-	private JMenuItem changePassword, deleteEntry,addEntry;
+	private JMenuItem changePassword, deleteEntry, addEntry;
 	private int clickedRow;
 	private String activeWebsite;
+	private JMenuItem menuItemSaveAs;
+	private JMenuItem editEntry;
 
 	public MainFrame(HashMap<String, Website> websites,
 			AccountManager accountManager) {
@@ -68,19 +70,28 @@ public class MainFrame extends JFrame implements ActionListener,
 		// Menu initialization
 		menuBar = new JMenuBar();
 		menuFile = new JMenu("File");
-
+		menuAccount = new JMenu("Account");
+		menuSettings = new JMenu("Settings");
+		menuInfo = new JMenu("Info");
 		menuBar.add(menuFile);
+		menuBar.add(menuAccount);
+		menuBar.add(menuSettings);
+		menuBar.add(menuInfo);
 		menuItemOpen = new JMenuItem("Open");
+		menuItemSaveAs=new JMenuItem("Save as");
 		menuItemSave = new JMenuItem("Save");
 		menuItemClose = new JMenuItem("Close");
-		menuFile.add(menuItemClose);
 		menuFile.add(menuItemOpen);
 		menuFile.add(menuItemSave);
+		menuFile.add(menuItemSaveAs);
+		menuFile.add(menuItemClose);
 		
+		
+
 		menuItemOpen.addActionListener(this);
 		menuItemSave.addActionListener(this);
+		menuItemSaveAs.addActionListener(this);
 		menuItemClose.addActionListener(this);
-		
 
 		this.setJMenuBar(menuBar);
 
@@ -108,16 +119,22 @@ public class MainFrame extends JFrame implements ActionListener,
 		pack();
 
 		popupMenu = new JPopupMenu();
+		
 		addEntry = new JMenuItem("Add new entry");
 		addEntry.addActionListener(this);
-
 		popupMenu.add(addEntry);
+		
 		deleteEntry = new JMenuItem("Delete Entry");
 		deleteEntry.addActionListener(this);
 		popupMenu.add(deleteEntry);
+		
 		changePassword = new JMenuItem("Change Password");
 		changePassword.addActionListener(this);
 		popupMenu.add(changePassword);
+		
+		editEntry=new JMenuItem("Edit Entry");
+		editEntry.addActionListener(this);
+		popupMenu.add(editEntry);
 
 	}
 
@@ -127,16 +144,23 @@ public class MainFrame extends JFrame implements ActionListener,
 			this.setVisible(false);
 			dispose();
 		}
-		if(arg0.getSource()==menuItemSave){
+		if (arg0.getSource() == menuItemSave) {
 			accountManager.writeToFile();
 		}
-		if(arg0.getSource()==menuItemOpen){
-			OpenAccountDialog dialog=new OpenAccountDialog(websites, this);
+		
+		if(arg0.getSource()==menuItemSaveAs){
+			SaveAccountsDialog dialog = new SaveAccountsDialog(accountManager);
 			dialog.setVisible(true);
 		}
-		if(arg0.getSource()==changePassword){
-			new ChangePasswordFrame(accountManager.findAccount(activeWebsite, accountTableModell
-						.getValueAt(0, clickedRow).toString())).setVisible(true);;
+		if (arg0.getSource() == menuItemOpen) {
+			OpenAccountDialog dialog = new OpenAccountDialog(websites, this);
+			dialog.setVisible(true);
+		}
+		if (arg0.getSource() == changePassword) {
+			ChangePasswordFrame frame=new ChangePasswordFrame(accountManager.findAccount(activeWebsite,
+					accountTableModell.getValueAt(0, clickedRow).toString()));
+			frame.setVisible(true);
+			frame.addWindowListener(this);
 		}
 		if (arg0.getSource() == deleteEntry) {
 			if (JOptionPane.showConfirmDialog((Component) arg0.getSource(),
@@ -149,11 +173,19 @@ public class MainFrame extends JFrame implements ActionListener,
 				accountTableModell.fireTableStructureChanged();
 			}
 		}
-		if(arg0.getSource()==addEntry){
+		if (arg0.getSource() == addEntry) {
 
-			NewEntryFrame entryFrame=new NewEntryFrame(accountManager, activeWebsite, websites);
+			NewEntryFrame entryFrame = new NewEntryFrame(accountManager,
+					activeWebsite, websites);
 			entryFrame.setVisible(true);
 			entryFrame.addWindowListener(this);
+		}
+		
+		if(arg0.getSource()==editEntry){
+			EditAccountFrame editAccountFrame=new EditAccountFrame(accountManager.findAccount(activeWebsite,
+					accountTableModell.getValueAt(0, clickedRow).toString()));
+			editAccountFrame.setVisible(true);
+			editAccountFrame.addWindowListener(this);
 		}
 
 	}
@@ -241,51 +273,51 @@ public class MainFrame extends JFrame implements ActionListener,
 	@Override
 	public void windowActivated(WindowEvent arg0) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void windowClosed(WindowEvent arg0) {
 		accountTableModell.fireTableDataChanged();
-		
+
 	}
 
 	@Override
 	public void windowClosing(WindowEvent arg0) {
 		accountTableModell.fireTableDataChanged();
-		
+
 	}
 
 	@Override
 	public void windowDeactivated(WindowEvent arg0) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void windowDeiconified(WindowEvent arg0) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void windowIconified(WindowEvent arg0) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void windowOpened(WindowEvent arg0) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	public void setAccountManager(AccountManager accountManager) {
-		this.accountManager=accountManager;
+		this.accountManager = accountManager;
 
 		accountTableModell = new AccountTableModell(accountManager);
 		accountTable.setModel(accountTableModell);
-		
+
 	}
 
 }
