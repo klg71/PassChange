@@ -2,6 +2,8 @@ package account;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
+
 import core.Website;
 
 public class Account {
@@ -20,7 +22,15 @@ public class Account {
 	
 	public void changePassword(String newPass) throws Exception{
 		website.initialize(userName, actualPassword);
-		website.changePassword(newPass);
+		try {
+			website.authenticate();
+			website.changePassword(newPass);
+			this.actualPassword=newPass;
+			this.lastChangedCalendar.setTime(new Date());
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new Exception("Password change unsuccesful.");
+		}
 	}
 	
 	public void setUserName(String userName) {

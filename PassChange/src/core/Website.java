@@ -15,6 +15,8 @@ public abstract class Website {
 
 	public abstract void changePassword(String newPass) throws Exception;
 	
+	public abstract boolean validatePassword(String pass);
+	
 	protected abstract void validateAuthentification() throws Exception;
 	
 	protected abstract void validatePasswordChange() throws Exception;

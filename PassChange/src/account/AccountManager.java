@@ -26,7 +26,7 @@ public class AccountManager {
 		accounts=xmlParser.loadAccountsFromFile(accountFile,masterPass);
 	}
 	
-	public void writeToFile(){
+	public void writeToFile() throws Exception{
 		xmlParser.saveAccountsToFile(accountFile,masterPass,this);
 	}
 	
@@ -83,7 +83,7 @@ public class AccountManager {
 		
 	}
 
-	public void writeToFile(String string, String file) {
+	public void writeToFile(String string, String file) throws Exception {
 
 		xmlParser.saveAccountsToFile(file,string,this);
 		

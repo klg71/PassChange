@@ -136,4 +136,11 @@ public class Facebook extends Website {
 	}
 
 
+	@Override
+	public boolean validatePassword(String pass) {
+		return pass.length()>6;
+		
+	}
+
+
 }

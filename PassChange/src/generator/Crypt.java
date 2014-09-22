@@ -40,7 +40,9 @@ public class Crypt {
 		String key="";
 		char c=0;
 		int i=0;
-		for(;i<pass.length();i++){
+		for(;i<pass.length()&i<12;i++){
+			if(key.length()>10)
+				break;
 			key+=(pass.charAt(i) ^ salt.charAt(i*2));
 		}
 		if(key.length()<12){

@@ -135,5 +135,17 @@ public class Twitter extends Website {
 			// s now contains "BAR"
 		}
 	}
+	@Override
+	public boolean validatePassword(String pass) {
+		if(pass.length()>7){
+			Pattern pattern = Pattern.compile("(?=.{7,})(((?=.*[A-Za-z]))|((?=.*[A-Z])(?=.*[0-9]))).*$",Pattern.MULTILINE);
+			Matcher m=pattern.matcher(pass);
+			if(m.find()){
+				return true;
+			}
+		}
+		return false;
+		
+	}
 
 }

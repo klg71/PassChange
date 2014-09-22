@@ -11,8 +11,10 @@ import java.net.CookieManager;
 import java.net.CookiePolicy;
 import java.net.CookieStore;
 import java.net.HttpCookie;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLDecoder;
@@ -24,6 +26,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Scanner;
 import java.util.StringTokenizer;
 import java.util.zip.GZIPInputStream;
 
@@ -32,11 +35,13 @@ import javax.net.ssl.HttpsURLConnection;
 public class WebClient {
 	private RequestType type;
 	private String body;
-	private HttpsURLConnection connection;
+	private URLConnection connection;
+	private HttpURLConnection connectionHttp;
 	private CookieManager cookieManager;
 	private CookieStore cookieStore;
 	private URL url;
 	boolean ref;
+	private String referer;
 
 	private Map store;
 
@@ -68,18 +73,25 @@ public class WebClient {
 
 	private void initConnection() {
 		try {
-			connection = (HttpsURLConnection) url.openConnection();
-		} catch (IOException e1) {
+			if (url.toURI().toString().contains("https")) {
+				connection = (HttpsURLConnection) url.openConnection();
+			} else {
+				connection = (HttpURLConnection) url.openConnection();
+			}
+
+		} catch (IOException | URISyntaxException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		
 
 		if (type == RequestType.POST) {
 			connection.setRequestProperty("Content-Length",
 					String.valueOf(body.length()));
 			connection.setRequestProperty("Content-Type",
-					"application/x-www-form-urlencoded");
+					"application/json, application/x-www-form-urlencoded");
+		}
+		if (!referer.equals("")) {
+			connection.setRequestProperty("Referer", referer);
 		}
 		connection.setRequestProperty("Connection", "keep-alive");
 		connection.setRequestProperty("DNT", "1");
@@ -93,15 +105,15 @@ public class WebClient {
 						"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
 		connection.setRequestProperty("Accept-Encoding", "gzip, deflate");
 
-//		try {
-//			setCookies(connection);
-//		} catch (IOException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
+		// try {
+		// setCookies(connection);
+		// } catch (IOException e) {
+		// // TODO Auto-generated catch block
+		// e.printStackTrace();
+		// }
 		if (type == RequestType.GET) {
 			try {
-				connection.setRequestMethod("GET");
+				((HttpURLConnection) connection).setRequestMethod("GET");
 				connection.setDoOutput(false);
 			} catch (ProtocolException e) {
 				// TODO Auto-generated catch block
@@ -109,7 +121,7 @@ public class WebClient {
 			}
 		} else {
 			try {
-				connection.setRequestMethod("POST");
+				((HttpURLConnection) connection).setRequestMethod("POST");
 				connection.setDoOutput(true);
 			} catch (ProtocolException e) {
 				// TODO Auto-generated catch block
@@ -135,6 +147,12 @@ public class WebClient {
 
 	public String sendRequest(String url, RequestType type, String body,
 			String filename, Boolean ref) {
+		return sendRequest(url, type, body, filename, ref, "");
+	}
+
+	public String sendRequest(String url, RequestType type, String body,
+			String filename, Boolean ref, String referer) {
+		this.referer = referer;
 		String ret = "";
 		System.out.println(filename);
 		FileWriter fileWriter = null;
@@ -159,7 +177,8 @@ public class WebClient {
 
 		try {
 			if (type == RequestType.POST) {
-				writer = new OutputStreamWriter(connection.getOutputStream());
+				writer = new OutputStreamWriter(
+						((HttpsURLConnection) connection).getOutputStream());
 				writer.write(body);
 				System.out.println(body);
 				writer.flush();
@@ -175,8 +194,31 @@ public class WebClient {
 			// TODO Auto-generated catch block
 			e2.printStackTrace();
 		}
-		 
-		 System.out.println();
+
+		System.out.println(cookieStore.getCookies().get(0));
+		try {
+			System.out.println(((HttpURLConnection) connection)
+					.getResponseCode());
+		} catch (IOException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+		}
+		System.out.println(connection.getHeaderField("Content-Encoding"));
+		try {
+			if (((HttpURLConnection) connection).getResponseCode() == 401) {
+				BufferedReader reader = new BufferedReader(
+						new InputStreamReader(
+								((HttpURLConnection) connection)
+										.getErrorStream()));
+				for (String line; (line = reader.readLine()) != null;) {
+					System.out.println(line);
+				}
+			}
+		} catch (IOException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+		}
+
 		// List<HttpCookie> cks = cookieStore.getCookies();
 		// for (HttpCookie ck : cks) {
 		// try {
@@ -190,38 +232,39 @@ public class WebClient {
 		// }
 		System.out.println(store);
 		BufferedReader reader = null;
-		if(!ref){
-		if (connection.getHeaderField("Content-Encoding") != null) {
-			try {
-				reader = new BufferedReader(new InputStreamReader(
-						new GZIPInputStream(connection.getInputStream())));
-			} catch (IOException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
+		if (!ref) {
+			if (connection.getHeaderField("Content-Encoding") != null) {
+				try {
+					reader = new BufferedReader(new InputStreamReader(
+							new GZIPInputStream(connection.getInputStream())));
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			} else {
+				try {
+					reader = new BufferedReader(new InputStreamReader(
+							connection.getInputStream()));
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 			}
-		} else {
-			try {
-				reader = new BufferedReader(new InputStreamReader(
-						connection.getInputStream()));
-			} catch (IOException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-		}
 
-		try {
-			for (String line; (line = reader.readLine()) != null;) {
-				ret += line;
-				fileWriter.write(line+System.getProperty("line.separator"));
+			try {
+				for (String line; (line = reader.readLine()) != null;) {
+					ret += line;
+					fileWriter.write(line
+							+ System.getProperty("line.separator"));
+				}
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 		}
 		try {
-			if(!ref)
-			reader.close();
+			if (!ref)
+				reader.close();
 			if (writer != null)
 				writer.close();
 			fileWriter.close();
@@ -361,9 +404,9 @@ public class WebClient {
 		}
 
 	}
-	
-	public String getCookie(String domain,String name){
-		return (String) ((Map)((Map) store.get(domain)).get(name)).get(name);
+
+	public String getCookie(String domain, String name) {
+		return (String) ((Map) ((Map) store.get(domain)).get(name)).get(name);
 	}
 
 }

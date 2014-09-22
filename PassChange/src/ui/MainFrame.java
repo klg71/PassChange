@@ -4,6 +4,10 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Point;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.ClipboardOwner;
+import java.awt.datatransfer.StringSelection;
+import java.awt.datatransfer.Transferable;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
@@ -35,7 +39,7 @@ import account.AccountManager;
 import core.Website;
 
 public class MainFrame extends JFrame implements ActionListener,
-		TreeSelectionListener, MouseListener, WindowListener {
+		TreeSelectionListener, MouseListener, WindowListener, ClipboardOwner {
 	/**
 	 * 
 	 */
@@ -55,7 +59,8 @@ public class MainFrame extends JFrame implements ActionListener,
 	private int clickedRow;
 	private String activeWebsite;
 	private JMenuItem menuItemSaveAs;
-	private JMenuItem editEntry;
+	private JMenuItem editEntry, copyClipboardEntry;
+	private boolean saved;
 
 	public MainFrame(HashMap<String, Website> websites,
 			AccountManager accountManager) {
@@ -66,7 +71,7 @@ public class MainFrame extends JFrame implements ActionListener,
 		setSize(500, 500);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		setTitle("PassChange");
-
+		saved = false;
 		// Menu initialization
 		menuBar = new JMenuBar();
 		menuFile = new JMenu("File");
@@ -78,15 +83,13 @@ public class MainFrame extends JFrame implements ActionListener,
 		menuBar.add(menuSettings);
 		menuBar.add(menuInfo);
 		menuItemOpen = new JMenuItem("Open");
-		menuItemSaveAs=new JMenuItem("Save as");
+		menuItemSaveAs = new JMenuItem("Save as");
 		menuItemSave = new JMenuItem("Save");
 		menuItemClose = new JMenuItem("Close");
 		menuFile.add(menuItemOpen);
 		menuFile.add(menuItemSave);
 		menuFile.add(menuItemSaveAs);
 		menuFile.add(menuItemClose);
-		
-		
 
 		menuItemOpen.addActionListener(this);
 		menuItemSave.addActionListener(this);
@@ -119,23 +122,27 @@ public class MainFrame extends JFrame implements ActionListener,
 		pack();
 
 		popupMenu = new JPopupMenu();
-		
+
 		addEntry = new JMenuItem("Add new entry");
 		addEntry.addActionListener(this);
 		popupMenu.add(addEntry);
-		
+
 		deleteEntry = new JMenuItem("Delete Entry");
 		deleteEntry.addActionListener(this);
 		popupMenu.add(deleteEntry);
-		
+
 		changePassword = new JMenuItem("Change Password");
 		changePassword.addActionListener(this);
 		popupMenu.add(changePassword);
-		
-		editEntry=new JMenuItem("Edit Entry");
+
+		editEntry = new JMenuItem("Edit Entry");
 		editEntry.addActionListener(this);
 		popupMenu.add(editEntry);
 
+		copyClipboardEntry = new JMenuItem("Copy to Clipboard");
+		copyClipboardEntry.addActionListener(this);
+		popupMenu.add(copyClipboardEntry);
+		this.addWindowListener(this);
 	}
 
 	@Override
@@ -145,22 +152,34 @@ public class MainFrame extends JFrame implements ActionListener,
 			dispose();
 		}
 		if (arg0.getSource() == menuItemSave) {
-			accountManager.writeToFile();
+			try {
+				accountManager.writeToFile();
+			} catch (Exception e) {
+				e.printStackTrace();
+				JOptionPane.showMessageDialog(this,e.getMessage());
+			}
+			saved = true;
 		}
-		
-		if(arg0.getSource()==menuItemSaveAs){
-			SaveAccountsDialog dialog = new SaveAccountsDialog(accountManager);
+
+		if (arg0.getSource() == menuItemSaveAs) {
+			SaveAccountsDialog dialog = new SaveAccountsDialog(this,
+					accountManager);
 			dialog.setVisible(true);
+			saved = true;
 		}
 		if (arg0.getSource() == menuItemOpen) {
 			OpenAccountDialog dialog = new OpenAccountDialog(websites, this);
 			dialog.setVisible(true);
+			saved = true;
 		}
 		if (arg0.getSource() == changePassword) {
-			ChangePasswordFrame frame=new ChangePasswordFrame(accountManager.findAccount(activeWebsite,
-					accountTableModell.getValueAt(0, clickedRow).toString()));
+			ChangePasswordFrame frame = new ChangePasswordFrame(
+					accountManager.findAccount(activeWebsite,
+							accountTableModell.getValueAt(0, clickedRow)
+									.toString()));
 			frame.setVisible(true);
 			frame.addWindowListener(this);
+			saved = false;
 		}
 		if (arg0.getSource() == deleteEntry) {
 			if (JOptionPane.showConfirmDialog((Component) arg0.getSource(),
@@ -171,6 +190,7 @@ public class MainFrame extends JFrame implements ActionListener,
 						.getValueAt(0, clickedRow).toString());
 				accountTableModell.fireTableDataChanged();
 				accountTableModell.fireTableStructureChanged();
+				saved = false;
 			}
 		}
 		if (arg0.getSource() == addEntry) {
@@ -179,13 +199,26 @@ public class MainFrame extends JFrame implements ActionListener,
 					activeWebsite, websites);
 			entryFrame.setVisible(true);
 			entryFrame.addWindowListener(this);
+			saved = false;
 		}
-		
-		if(arg0.getSource()==editEntry){
-			EditAccountFrame editAccountFrame=new EditAccountFrame(accountManager.findAccount(activeWebsite,
-					accountTableModell.getValueAt(0, clickedRow).toString()));
+
+		if (arg0.getSource() == editEntry) {
+			EditAccountFrame editAccountFrame = new EditAccountFrame(
+					accountManager.findAccount(activeWebsite,
+							accountTableModell.getValueAt(0, clickedRow)
+									.toString()));
 			editAccountFrame.setVisible(true);
 			editAccountFrame.addWindowListener(this);
+			saved = false;
+		}
+
+		if (arg0.getSource() == copyClipboardEntry) {
+			Clipboard clip = getToolkit().getSystemClipboard();
+			String s = accountManager.findAccount(activeWebsite,
+					accountTableModell.getValueAt(0, clickedRow).toString())
+					.getActualPassword();
+			StringSelection cont = new StringSelection(s);
+			clip.setContents(cont, this);
 		}
 
 	}
@@ -237,9 +270,11 @@ public class MainFrame extends JFrame implements ActionListener,
 			if (clickedRow == -1) {
 				changePassword.setEnabled(false);
 				deleteEntry.setEnabled(false);
+				editEntry.setEnabled(false);
 			} else {
 				changePassword.setEnabled(true);
 				deleteEntry.setEnabled(true);
+				editEntry.setEnabled(true);
 
 			}
 		}
@@ -285,6 +320,14 @@ public class MainFrame extends JFrame implements ActionListener,
 	@Override
 	public void windowClosing(WindowEvent arg0) {
 		accountTableModell.fireTableDataChanged();
+		if (arg0.getSource() == this&&!saved) {
+			if (JOptionPane.showConfirmDialog((Component) arg0.getSource(),
+					"Do you want to save before quitting?", "Warning", 0) == JOptionPane.YES_OPTION) {
+				SaveAccountsDialog accountsDialog = new SaveAccountsDialog(
+						this, accountManager);
+				accountsDialog.setVisible(true);
+			}
+		}
 
 	}
 
@@ -317,6 +360,12 @@ public class MainFrame extends JFrame implements ActionListener,
 
 		accountTableModell = new AccountTableModell(accountManager);
 		accountTable.setModel(accountTableModell);
+
+	}
+
+	@Override
+	public void lostOwnership(Clipboard arg0, Transferable arg1) {
+		// TODO Auto-generated method stub
 
 	}
 

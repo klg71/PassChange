@@ -58,9 +58,15 @@ public class ChangePasswordFrame extends JFrame implements ActionListener,
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		try {
-			account.changePassword(new String(passwordField.getPassword()));
-			setVisible(false);
-			dispose();
+			if (account.getWebsite().validatePassword(
+					new String(passwordField.getPassword()))) {
+				account.changePassword(new String(passwordField.getPassword()));
+				setVisible(false);
+				dispose();
+			}
+			else {
+				JOptionPane.showMessageDialog(this,"Your Password dont fits the minimum complexity requirements");
+			}
 		} catch (Exception e1) {
 			JOptionPane.showMessageDialog(this, e1.getMessage());
 			e1.printStackTrace();

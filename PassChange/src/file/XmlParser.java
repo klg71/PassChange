@@ -53,8 +53,8 @@ public class XmlParser {
 		try {
 			builder = factory.newDocumentBuilder();
 		} catch (ParserConfigurationException e2) {
-			// TODO Auto-generated catch block
 			e2.printStackTrace();
+			throw new Exception("Something went wrong while parsing Accountfile");
 		}
 		String content = null;
 		try {
@@ -62,8 +62,8 @@ public class XmlParser {
 					filename)), Crypt.generateKey(password,salt)));
 			System.out.println(content);
 		} catch (Exception e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
+			throw new Exception("Something went wrong while parsing Accountfile");
 		}
 		Document document = null;
 		try {
@@ -71,6 +71,7 @@ public class XmlParser {
 					.getBytes()));
 		} catch (SAXException e) {
 			e.printStackTrace();
+			throw new Exception("Something went wrong while parsing Accountfile");
 		} catch (IOException e) {
 			throw new Exception("You maybe entered a wrong password. Please try again.");
 		}
@@ -118,7 +119,7 @@ public class XmlParser {
 	}
 
 	public void saveAccountsToFile(String filename, String password,
-			AccountManager accountManager) {
+			AccountManager accountManager) throws Exception {
 		 try {
 			 
 				DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
@@ -166,14 +167,16 @@ public class XmlParser {
 				try {
 					Crypt.encode(stringWriter.toString().getBytes(), new FileOutputStream(new File(filename)),Crypt.generateKey(password,salt));
 				} catch (Exception e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
+					throw new Exception("Something went wrong while encoding file");
 				}
 		 
 			  } catch (ParserConfigurationException pce) {
 				pce.printStackTrace();
+				throw new Exception("Something went wrong while encoding file");
 			  } catch (TransformerException tfe) {
 				tfe.printStackTrace();
+				throw new Exception("Something went wrong while encoding file");
 			  }
 	}
 

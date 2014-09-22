@@ -178,4 +178,10 @@ public class Google extends Website {
 		formData = tempFormMap;
 	}
 
+	@Override
+	public boolean validatePassword(String pass) {
+		return pass.length()>8;
+		
+	}
+
 }

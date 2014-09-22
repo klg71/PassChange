@@ -11,6 +11,7 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -33,8 +34,10 @@ public class SaveAccountsDialog extends JDialog implements KeyListener, ActionLi
 	private String file; 
 	private AccountManager accountManager;
 
-	public SaveAccountsDialog(AccountManager accountManager) {
+	public SaveAccountsDialog(JFrame frame,AccountManager accountManager) {
+		super(frame,true);
 		JFileChooser fileChooser = new JFileChooser(".");
+		//fileChooser.setApproveButtonText("Save");
 		this.accountManager=accountManager;
 		if (fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
 			file=fileChooser.getSelectedFile().getAbsolutePath();
