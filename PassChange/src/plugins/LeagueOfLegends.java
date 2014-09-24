@@ -142,7 +142,7 @@ public class LeagueOfLegends extends Website {
 								+ recaptchaID
 								+ "&k=6LcwdeESAAAAAJg_ltVGdjrqlf7Bmbg449SyUcSW&type=image&reason=i&lang=de",
 						RequestType.GET, "", "reloadCaptcha", false);
-		System.out.println(body);
+		
 		Matcher r = reloadPattern.matcher(body);
 		r.find();
 		recaptchaID = r.group();
@@ -150,8 +150,7 @@ public class LeagueOfLegends extends Website {
 		try {
 			captchaImage = ImageIO.read(new URL(
 					"https://www.google.com/recaptcha/api/image?c=" + recaptchaID));
-			ImageIO.write((RenderedImage) captchaImage, "jpeg", new File(
-					"captchaImage.jpeg"));
+			
 			JLabel picLabel = new JLabel(new ImageIcon(captchaImage));
 			JTextField captchaField = new JTextField();
 			JPanel dialogPanel = new JPanel();

@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
+import java.net.Authenticator;
 import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
@@ -13,6 +14,7 @@ import java.net.CookieStore;
 import java.net.HttpCookie;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.PasswordAuthentication;
 import java.net.ProtocolException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -43,7 +45,7 @@ public class WebClient {
 	boolean ref;
 	private String referer;
 
-	private Map store;
+	private Map<String, Map<String, Map<String, String>>> store;
 
 	private static final String SET_COOKIE = "Set-Cookie";
 	private static final String COOKIE_VALUE_DELIMITER = ";";
@@ -63,10 +65,10 @@ public class WebClient {
 		ref = false;
 		cookieManager = new CookieManager();
 		cookieManager.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
-		CookieHandler.setDefault(cookieManager);
+		//CookieHandler.setDefault(cookieManager);
 		cookieStore = cookieManager.getCookieStore();
 
-		store = new HashMap();
+		store = new HashMap<String, Map<String, Map<String, String>>>();
 		dateFormat = new SimpleDateFormat(DATE_FORMAT);
 
 	}
@@ -88,7 +90,7 @@ public class WebClient {
 			connection.setRequestProperty("Content-Length",
 					String.valueOf(body.length()));
 			connection.setRequestProperty("Content-Type",
-					"application/json, application/x-www-form-urlencoded");
+					"application/x-www-form-urlencoded; charset=UTF-8");
 		}
 		if (!referer.equals("")) {
 			connection.setRequestProperty("Referer", referer);
@@ -102,15 +104,15 @@ public class WebClient {
 						"Mozilla/5.0 (Windows NT 6.1; WOW64; rv:20.0) Gecko/20100101 Firefox/20.0");
 		connection
 				.setRequestProperty("Accept",
-						"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
+						"application/json,text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
 		connection.setRequestProperty("Accept-Encoding", "gzip, deflate");
 
-		// try {
-		// setCookies(connection);
-		// } catch (IOException e) {
-		// // TODO Auto-generated catch block
-		// e.printStackTrace();
-		// }
+		 try {
+		 setCookies();
+		 } catch (IOException e) {
+		 // TODO Auto-generated catch block
+		 e.printStackTrace();
+		 }
 		if (type == RequestType.GET) {
 			try {
 				((HttpURLConnection) connection).setRequestMethod("GET");
@@ -195,7 +197,7 @@ public class WebClient {
 			e2.printStackTrace();
 		}
 
-		System.out.println(cookieStore.getCookies().get(0));
+		//System.out.println(cookieStore.getCookies().get(0));
 		try {
 			System.out.println(((HttpURLConnection) connection)
 					.getResponseCode());
@@ -203,7 +205,6 @@ public class WebClient {
 			// TODO Auto-generated catch block
 			e2.printStackTrace();
 		}
-		System.out.println(connection.getHeaderField("Content-Encoding"));
 		try {
 			if (((HttpURLConnection) connection).getResponseCode() == 401) {
 				BufferedReader reader = new BufferedReader(
@@ -219,17 +220,17 @@ public class WebClient {
 			e2.printStackTrace();
 		}
 
-		// List<HttpCookie> cks = cookieStore.getCookies();
-		// for (HttpCookie ck : cks) {
-		// try {
-		// System.out.print(URLDecoder.decode(ck.getName(), "UTF-8")
-		// + ": ");
-		// System.out.println(URLDecoder.decode(ck.getValue(), "UTF-8"));
-		// } catch (UnsupportedEncodingException e) {
-		// // TODO Auto-generated catch block
-		// e.printStackTrace();
-		// }
-		// }
+//		 List<HttpCookie> cks = cookieStore.getCookies();
+//		 for (HttpCookie ck : cks) {
+//		 try {
+//		 System.out.print(URLDecoder.decode(ck.getName(), "UTF-8")
+//		 + ": ");
+//		 System.out.println(URLDecoder.decode(ck.getValue(), "UTF-8"));
+//		 } catch (UnsupportedEncodingException e) {
+//		 // TODO Auto-generated catch block
+//		 e.printStackTrace();
+//		 }
+//		 }
 		System.out.println(store);
 		BufferedReader reader = null;
 		if (!ref) {
@@ -275,21 +276,39 @@ public class WebClient {
 		return ret;
 
 	}
+	public void setCookie(String domain,String key,String value){
 
+		Map<String, String> cookie = new HashMap<String, String>();
+		Map<String, Map<String, String>> domainStore; 
+		if (store.containsKey(domain)) {
+			// we do, so lets retrieve it from the store
+			domainStore = (Map<String, Map<String, String>>) store.get(domain);
+		} else {
+			// we don't, so let's create it and put it in the store
+			domainStore = new HashMap<String, Map<String, String>>();
+			store.put(domain, domainStore);
+		}
+
+		domainStore.put(key, cookie);
+		cookie.put(key, value);
+		cookie.put("path","/");
+		cookie.put("domain", domain);
+	}
+	
 	public void storeCookies(URLConnection conn) throws IOException {
 
 		// let's determine the domain from where these cookies are being sent
 		String domain = getDomainFromHost(conn.getURL().getHost());
 
-		Map domainStore; // this is where we will store cookies for this domain
+		Map<String, Map<String, String>> domainStore; // this is where we will store cookies for this domain
 
 		// now let's check the store to see if we have an entry for this domain
 		if (store.containsKey(domain)) {
 			// we do, so lets retrieve it from the store
-			domainStore = (Map) store.get(domain);
+			domainStore = (Map<String, Map<String, String>>) store.get(domain);
 		} else {
 			// we don't, so let's create it and put it in the store
-			domainStore = new HashMap();
+			domainStore = new HashMap<String, Map<String, String>>();
 			store.put(domain, domainStore);
 		}
 
@@ -298,7 +317,7 @@ public class WebClient {
 		String headerName = null;
 		for (int i = 1; (headerName = conn.getHeaderFieldKey(i)) != null; i++) {
 			if (headerName.equalsIgnoreCase(SET_COOKIE)) {
-				Map<String, String> cookie = new HashMap();
+				Map<String, String> cookie = new HashMap<String, String>();
 				StringTokenizer st = new StringTokenizer(
 						conn.getHeaderField(i), COOKIE_VALUE_DELIMITER);
 
@@ -333,23 +352,23 @@ public class WebClient {
 		}
 	}
 
-	public void setCookies(URLConnection conn) throws IOException {
+	public void setCookies() throws IOException {
 
 		// let's determine the domain and path to retrieve the appropriate
 		// cookies
-		URL url = conn.getURL();
+		URL url = connection.getURL();
 		String domain = getDomainFromHost(url.getHost());
 		String path = url.getPath();
 
-		Map domainStore = (Map) store.get(domain);
+		Map<String, Map<String, String>> domainStore = (Map<String, Map<String, String>>) store.get(domain);
 		if (domainStore == null)
 			return;
 		StringBuffer cookieStringBuffer = new StringBuffer();
 
-		Iterator cookieNames = domainStore.keySet().iterator();
+		Iterator<String> cookieNames = domainStore.keySet().iterator();
 		while (cookieNames.hasNext()) {
 			String cookieName = (String) cookieNames.next();
-			Map cookie = (Map) domainStore.get(cookieName);
+			Map<String,String> cookie = (Map<String, String>) domainStore.get(cookieName);
 			// check cookie to ensure path matches and cookie is not expired
 			// if all is cool, add cookie to header string
 			if (comparePaths((String) cookie.get(PATH), path)
@@ -362,7 +381,7 @@ public class WebClient {
 			}
 		}
 		try {
-			conn.setRequestProperty(COOKIE, cookieStringBuffer.toString());
+			connection.setRequestProperty(COOKIE, cookieStringBuffer.toString());
 		} catch (java.lang.IllegalStateException ise) {
 			IOException ioe = new IOException(
 					"Illegal State! Cookies cannot be set on a URLConnection that is already connected. "
@@ -406,7 +425,8 @@ public class WebClient {
 	}
 
 	public String getCookie(String domain, String name) {
-		return (String) ((Map) ((Map) store.get(domain)).get(name)).get(name);
+		return (String) ((Map<String,String>) ((Map<String, Map<String, String>>) store.get(domain)).get(name)).get(name);
 	}
 
+	
 }
