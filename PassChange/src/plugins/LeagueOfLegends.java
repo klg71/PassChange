@@ -1,6 +1,8 @@
 package plugins;
 
 import java.awt.Image;
+import java.util.ArrayList;
+import java.util.List;
 import java.awt.image.RenderedImage;
 import java.io.File;
 import java.io.IOException;
@@ -37,6 +39,8 @@ public class LeagueOfLegends extends Website {
 		super.initialize(username, password);
 		body = "";
 		webClient = new WebClient();
+		solvedTask="";
+		recaptchaID="";
 	}
 
 	public LeagueOfLegends() {
@@ -46,26 +50,37 @@ public class LeagueOfLegends extends Website {
 	@Override
 	public void authenticate() throws Exception {
 		// /get Cookies
-		body = webClient.sendRequest("http://euw.leagueoflegends.com/de/news/",
+		
+		webClient.sendRequest("http://euw.leagueoflegends.com/de/news/",
 				RequestType.GET, "", "lolStart", false);
+		 webClient.sendRequest("https://account.leagueoflegends.com/login", RequestType.GET,"", "lologin",false);
 
-		body = webClient
+		body=webClient
 				.sendRequest(
-						"https://www.google.com/recaptcha/api/noscript?k=6LcwdeESAAAAAJg_ltVGdjrqlf7Bmbg449SyUcSW",
+						"https://www.google.com/recaptcha/api/challenge?k=6LcwdeESAAAAAJg_ltVGdjrqlf7Bmbg449SyUcSW&ajax=1&lang=de",
 						RequestType.GET, "", "lolCaptcha", false);
 		getImage();
 		System.out.println(solvedTask);
 		System.out.println(recaptchaID);
 		String post = "";
-		post =  "username="
-				+ URLEncoder.encode(username, "UTF-8")+"&password=" + URLEncoder.encode(pass, "UTF-8")
+		post = "username=" + URLEncoder.encode(username, "UTF-8")
+				+ "&password=" + URLEncoder.encode(pass, "UTF-8")
 				+ "&recaptcha_challenge_field="
 				+ URLEncoder.encode(recaptchaID, "UTF-8")
 				+ "&recaptcha_response_field="
-				+ URLEncoder.encode(solvedTask, "UTF-8") ;
-		body = webClient.sendRequest(
-				"https://account.leagueoflegends.com/auth", RequestType.POST,
-				post, "lollogin", false,"https://account.leagueoflegends.com/pm.html?xdm_e=http%3A%2F%2Feuw.leagueoflegends.com&xdm_c=default3117&xdm_p=1");
+				+ URLEncoder.encode(solvedTask, "UTF-8");
+		webClient.setCookie("leagueoflegends.com", "PVPNET_REGION","euw");
+		webClient.setCookie("leagueoflegends.com", "PVPNET_LANG","de_DE");
+		body = webClient
+				.sendRequest(
+						"https://account.leagueoflegends.com/auth",
+						RequestType.POST,
+						post,
+						"lollogin",
+						false,
+						"https://account.leagueoflegends.com/pm.html?xdm_e=http%3A%2F%2Feuw.leagueoflegends.com&xdm_c=default3117&xdm_p=1");
+	System.out.println(body);
+		validateAuthentification();
 	}
 
 	@Override
@@ -82,7 +97,9 @@ public class LeagueOfLegends extends Website {
 
 	@Override
 	protected void validateAuthentification() throws Exception {
-		// TODO Auto-generated method stub
+	if(!body.contains("\"success\":true")){
+		throw new Exception("Login unsuccesful! Maybe you entered a wrong captcha or wrong username/password!");
+	}
 
 	}
 
@@ -111,21 +128,28 @@ public class LeagueOfLegends extends Website {
 
 	private void getImage() {
 
-		Pattern urlPattern = Pattern.compile("(image\\?c=[A-Za-z0-9_\\-]+)",
+		Pattern urlPattern = Pattern.compile("'([0-9A-Za-z_-]{200,250}')",
 				Pattern.MULTILINE | Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
-		Pattern recaptchaPattern = Pattern
-				.compile("(value=\"[0-9A-Za-z_-]+\")");
+		Pattern reloadPattern = Pattern.compile("([0-9A-Za-z_-]{206,})");
+
 		Matcher m = urlPattern.matcher(body);
-		Matcher k = recaptchaPattern.matcher(body);
-		k.find();
 		m.find();
-		recaptchaID = k.group().substring(7,k.group().length()-1);
+		recaptchaID = m.group().substring(1, m.group().length() - 1);
 		String path = m.group();
-		body=webClient.sendRequest("http://www.google.com/recaptcha/api/reload?c="+recaptchaID+"&k=6LcwdeESAAAAAJg_ltVGdjrqlf7Bmbg449SyUcSW&type=image", RequestType.GET, "","reloadCaptcha", false);
+		body = webClient
+				.sendRequest(
+						"https://www.google.com/recaptcha/api/reload?c="
+								+ recaptchaID
+								+ "&k=6LcwdeESAAAAAJg_ltVGdjrqlf7Bmbg449SyUcSW&type=image&reason=i&lang=de",
+						RequestType.GET, "", "reloadCaptcha", false);
 		System.out.println(body);
+		Matcher r = reloadPattern.matcher(body);
+		r.find();
+		recaptchaID = r.group();
+		
 		try {
 			captchaImage = ImageIO.read(new URL(
-					"https://www.google.com/recaptcha/api/" + path));
+					"https://www.google.com/recaptcha/api/image?c=" + recaptchaID));
 			ImageIO.write((RenderedImage) captchaImage, "jpeg", new File(
 					"captchaImage.jpeg"));
 			JLabel picLabel = new JLabel(new ImageIcon(captchaImage));
